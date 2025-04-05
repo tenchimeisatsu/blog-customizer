@@ -24,15 +24,16 @@ export type FormProps = {
 };
 
 export const ArticleParamsForm = ({ themeSetter }: FormProps) => {
-	const [isOpen, setIsOpen] = useState(false);
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [articleParams, setArticleParams] =
 		useState<ArticleStateType>(defaultArticleState);
 	const rootRef = useRef<HTMLElement>(null);
 	useEffect(() => {
+		if (!isMenuOpen) return;
 		const handleClick = (event: MouseEvent) => {
 			const { target } = event;
 			if (target instanceof Node && !rootRef.current?.contains(target)) {
-				setIsOpen(false);
+				setIsMenuOpen(false);
 			}
 		};
 
@@ -41,23 +42,26 @@ export const ArticleParamsForm = ({ themeSetter }: FormProps) => {
 		return () => {
 			window.removeEventListener('mousedown', handleClick);
 		};
-	}, []);
+	}, [isMenuOpen]);
 
 	function handleSubmit(e: SyntheticEvent) {
 		e.preventDefault();
+		themeSetter(articleParams);
 	}
 
 	return (
 		<>
 			<ArrowButton
-				isOpen={isOpen}
+				isOpen={isMenuOpen}
 				onClick={() => {
-					setIsOpen(!isOpen);
+					setIsMenuOpen(!isMenuOpen);
 				}}
 			/>
 			<aside
 				ref={rootRef}
-				className={clsx(styles.container, { [styles.container_open]: isOpen })}>
+				className={clsx(styles.container, {
+					[styles.container_open]: isMenuOpen,
+				})}>
 				<form className={styles.form} onSubmit={handleSubmit}>
 					<Text weight={800} size={31} uppercase={true}>
 						Задайте параметры
@@ -124,12 +128,7 @@ export const ArticleParamsForm = ({ themeSetter }: FormProps) => {
 								setArticleParams(defaultArticleState);
 							}}
 						/>
-						<Button
-							title='Применить'
-							htmlType='submit'
-							type='apply'
-							onClick={() => themeSetter(articleParams)}
-						/>
+						<Button title='Применить' htmlType='submit' type='apply' />
 					</div>
 				</form>
 			</aside>
